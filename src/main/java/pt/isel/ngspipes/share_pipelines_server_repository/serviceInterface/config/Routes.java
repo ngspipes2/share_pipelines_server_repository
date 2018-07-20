@@ -8,5 +8,6 @@ public class Routes {
     public static final String INSERT_PIPELINES_REPOSITORY = PIPELINES_REPOSITORIES;
     public static final String UPDATE_PIPELINES_REPOSITORY = PIPELINES_REPOSITORIES + "/{repositoryId}";
     public static final String DELETE_PIPELINES_REPOSITORY = PIPELINES_REPOSITORIES + "/{repositoryId}";
+    public static final String GET_PIPELINES_REPOSITORIES_OF_USER = "/pipelinesrepositories/owner/{userName}";
 
 }
