@@ -120,7 +120,7 @@ public class RepositoryController implements IRepositoryController {
         for(User user : repository.getUsersAccess())
             user.setPassword("");
 
-        for(Group group : repository.getGroupAccess())
+        for(Group group : repository.getGroupsAccess())
             for(User member : group.getMembers())
                 member.setPassword("");
     }
