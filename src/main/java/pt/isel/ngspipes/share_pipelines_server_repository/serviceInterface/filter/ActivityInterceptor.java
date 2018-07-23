@@ -3,9 +3,11 @@ package pt.isel.ngspipes.share_pipelines_server_repository.serviceInterface.filt
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.handler.MappedInterceptor;
 import pt.isel.ngspipes.share_core.logic.domain.User;
 import pt.isel.ngspipes.share_core.logic.service.ICurrentUserSupplier;
 import pt.isel.ngspipes.share_core.logic.service.IService;
@@ -65,6 +67,11 @@ public class ActivityInterceptor extends HandlerInterceptorAdapter {
         int status = response.getStatus();
 
         LOGGER.info(String.format(RESPONSE_MSG, userName, method, uri, status));
+    }
+
+    @Bean
+    private MappedInterceptor getActivityInterceptor() {
+        return new MappedInterceptor(null, this);
     }
 
 }
