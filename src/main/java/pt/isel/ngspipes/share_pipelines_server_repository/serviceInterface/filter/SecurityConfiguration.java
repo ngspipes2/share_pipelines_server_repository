@@ -1,7 +1,6 @@
 package pt.isel.ngspipes.share_pipelines_server_repository.serviceInterface.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -11,15 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import pt.isel.ngspipes.share_core.logic.domain.User;
-import pt.isel.ngspipes.share_core.logic.service.IService;
-import pt.isel.ngspipes.share_core.logic.service.exceptions.ServiceException;
 import pt.isel.ngspipes.share_pipelines_server_repository.serviceInterface.config.Routes;
 
-import java.util.Collection;
-import java.util.Properties;
+import javax.sql.DataSource;
 
 @CrossOrigin
 @Configuration
@@ -28,10 +23,10 @@ import java.util.Properties;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private IService<User, String> userService;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private DataSource dataSource;
 
 
 
@@ -56,21 +51,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-            .userDetailsService(inMemoryUserDetailsManager())
+        auth.jdbcAuthentication()
+            .dataSource(dataSource)
+            .usersByUsernameQuery("select username, password, true from _user where username=?")
+            .authoritiesByUsernameQuery("select username, concat('ROLE_', role) from _user where username=?")
             .passwordEncoder(passwordEncoder);
-    }
-
-    @Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager() throws ServiceException {
-        Collection<User> users = userService.getAll();
-
-        Properties properties = new Properties();
-
-        for(User user : users)
-            properties.put(user.getUserName(), user.getPassword()+",ROLE_"+user.getRole().toString()+",enabled");
-
-        return new InMemoryUserDetailsManager(properties);
     }
 
 }
