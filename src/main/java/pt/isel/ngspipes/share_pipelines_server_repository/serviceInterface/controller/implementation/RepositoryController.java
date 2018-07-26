@@ -84,7 +84,7 @@ public class RepositoryController implements IRepositoryController {
     }
 
     @Override
-    public ResponseEntity<Collection<PipelinesRepository>> getPipelinesRepositoriesOfUser(String userName) throws Exception {
+    public ResponseEntity<Collection<PipelinesRepository>> getPipelinesRepositoriesOfUser(@PathVariable String userName) throws Exception {
         if(!isValidAccess(Access.Operation.GET, null))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
