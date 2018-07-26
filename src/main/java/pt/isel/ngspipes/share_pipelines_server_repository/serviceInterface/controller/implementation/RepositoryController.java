@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pt.isel.ngspipes.share_core.logic.domain.Group;
 import pt.isel.ngspipes.share_core.logic.domain.PipelinesRepository;
-import pt.isel.ngspipes.share_core.logic.domain.ToolsRepository;
 import pt.isel.ngspipes.share_core.logic.domain.User;
 import pt.isel.ngspipes.share_core.logic.service.ICurrentUserSupplier;
 import pt.isel.ngspipes.share_core.logic.service.PermissionService;
@@ -103,8 +102,8 @@ public class RepositoryController implements IRepositoryController {
         Access access = new Access();
         access.userName = currentUser == null ? null : currentUser.getUserName();
         access.operation = operation;
-        access.entity = ToolsRepository.class;
-        access.entityId = Integer.toString(repositoryId);
+        access.entity = PipelinesRepository.class;
+        access.entityId = repositoryId == null ? null : Integer.toString(repositoryId);
 
         return permissionService.isValid(access);
     }
