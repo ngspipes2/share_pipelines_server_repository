@@ -45,9 +45,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers(Routes.DELETE_PIPELINES_REPOSITORY).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
             .antMatchers(Routes.GET_PIPELINES_REPOSITORIES_OF_USER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
 
-            .antMatchers(Routes.GET_PIPELINES_REPOSITORY_IMAGE).permitAll()
-            .antMatchers(Routes.UPDATE_PIPELINES_REPOSITORY_IMAGE).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
-            .antMatchers(Routes.DELETE_PIPELINES_REPOSITORY_IMAGE).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(HttpMethod.GET, Routes.GET_PIPELINES_REPOSITORY_IMAGE).permitAll()
+            .antMatchers(HttpMethod.POST, Routes.UPDATE_PIPELINES_REPOSITORY_IMAGE).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(HttpMethod.DELETE, Routes.DELETE_PIPELINES_REPOSITORY_IMAGE).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
 
             .and().httpBasic()
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
