@@ -11,7 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import pt.isel.ngspipes.share_core.logic.domain.User;
+import pt.isel.ngspipes.share_authentication_server.logic.domain.User;
 import pt.isel.ngspipes.share_pipelines_server_repository.serviceInterface.config.Routes;
 
 import javax.sql.DataSource;
@@ -45,9 +45,27 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers(Routes.DELETE_PIPELINES_REPOSITORY).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
             .antMatchers(Routes.GET_PIPELINES_REPOSITORIES_OF_USER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
 
+            .antMatchers(HttpMethod.GET, Routes.GET_ALL_USER_MEMBERS).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.GET_USER_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(HttpMethod.POST, Routes.INSERT_USER_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.UPDATE_USER_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.DELETE_USER_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.GET_USER_MEMBERS_WITH_USER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.GET_USER_MEMBERS_OF_REPOSITORY).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+
+            .antMatchers(HttpMethod.GET, Routes.GET_ALL_GROUP_MEMBERS).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.GET_GROUP_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(HttpMethod.POST, Routes.INSERT_GROUP_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.UPDATE_GROUP_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.DELETE_GROUP_MEMBER).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.GET_GROUP_MEMBERS_WITH_GROUP).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+            .antMatchers(Routes.GET_GROUP_MEMBERS_OF_REPOSITORY).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+
             .antMatchers(HttpMethod.GET, Routes.GET_PIPELINES_REPOSITORY_IMAGE).permitAll()
             .antMatchers(HttpMethod.POST, Routes.UPDATE_PIPELINES_REPOSITORY_IMAGE).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
             .antMatchers(HttpMethod.DELETE, Routes.DELETE_PIPELINES_REPOSITORY_IMAGE).hasAnyRole(User.Role.NORMAL.toString(), User.Role.ADMIN.toString())
+
+            .antMatchers(Routes.PIPELINES_REPOSITORY_SERVER_URI).permitAll()
 
             .and().httpBasic()
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

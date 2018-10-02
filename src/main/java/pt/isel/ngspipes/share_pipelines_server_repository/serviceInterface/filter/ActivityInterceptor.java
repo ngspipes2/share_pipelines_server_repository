@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.handler.MappedInterceptor;
-import pt.isel.ngspipes.share_core.logic.domain.User;
-import pt.isel.ngspipes.share_core.logic.service.ICurrentUserSupplier;
+import pt.isel.ngspipes.share_authentication_server.logic.domain.User;
+import pt.isel.ngspipes.share_authentication_server.logic.service.ICurrentUserSupplier;
 import pt.isel.ngspipes.share_core.logic.service.IService;
 import pt.isel.ngspipes.share_core.logic.service.exceptions.ServiceException;
 
