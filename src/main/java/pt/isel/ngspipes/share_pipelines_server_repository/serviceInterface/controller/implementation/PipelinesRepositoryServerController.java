@@ -3,187 +3,146 @@ package pt.isel.ngspipes.share_pipelines_server_repository.serviceInterface.cont
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import pt.isel.ngspipes.dsl_core.descriptors.pipeline.jackson_entities.typed.TypedPipelineDescriptor;
-import pt.isel.ngspipes.dsl_core.descriptors.pipeline.utils.JacksonEntityService;
 import pt.isel.ngspipes.pipeline_descriptor.IPipelineDescriptor;
 import pt.isel.ngspipes.pipeline_repository.IPipelinesRepository;
-import pt.isel.ngspipes.share_authentication_server.logic.domain.AccessToken;
-import pt.isel.ngspipes.share_authentication_server.logic.domain.GroupMember;
-import pt.isel.ngspipes.share_authentication_server.logic.domain.User;
-import pt.isel.ngspipes.share_authentication_server.logic.service.PermissionService;
-import pt.isel.ngspipes.share_authentication_server.logic.service.accessToken.IAccessTokenService;
-import pt.isel.ngspipes.share_authentication_server.logic.service.groupMember.IGroupMemberService;
-import pt.isel.ngspipes.share_core.logic.service.IService;
+import pt.isel.ngspipes.share_core.logic.domain.AccessToken;
+import pt.isel.ngspipes.share_core.logic.domain.User;
+import pt.isel.ngspipes.share_core.logic.service.accessToken.IAccessTokenService;
+import pt.isel.ngspipes.share_core.logic.service.exceptions.NonExistentEntityException;
 import pt.isel.ngspipes.share_core.logic.service.exceptions.ServiceException;
-import pt.isel.ngspipes.share_pipelines_server_repository.logic.domain.PipelinesRepositoryGroupMember;
-import pt.isel.ngspipes.share_pipelines_server_repository.logic.domain.PipelinesRepositoryMetadata;
-import pt.isel.ngspipes.share_pipelines_server_repository.logic.domain.PipelinesRepositoryUserMember;
-import pt.isel.ngspipes.share_pipelines_server_repository.logic.service.repositoryGroupMember.IPipelinesRepositoryGroupMemberService;
-import pt.isel.ngspipes.share_pipelines_server_repository.logic.service.repositoryMetadata.IPipelinesRepositoryMetadataService;
-import pt.isel.ngspipes.share_pipelines_server_repository.logic.service.repositoryService.IPipelinesRepositoryService;
-import pt.isel.ngspipes.share_pipelines_server_repository.logic.service.repositoryUserMember.IPipelinesRepositoryUserMemberService;
+import pt.isel.ngspipes.share_core.logic.service.permission.Access;
+import pt.isel.ngspipes.share_core.logic.service.user.IUserService;
+import pt.isel.ngspipes.share_dynamic_repository.logic.domain.RepositoryMetadata;
+import pt.isel.ngspipes.share_dynamic_repository.logic.service.permission.IRepositoryPermissionService;
+import pt.isel.ngspipes.share_dynamic_repository.logic.service.repositoryMetadata.IRepositoryMetadataService;
+import pt.isel.ngspipes.share_dynamic_repository.logic.service.repositoryMetadata.IRepositoryService;
 import pt.isel.ngspipes.share_pipelines_server_repository.serviceInterface.controller.facade.IPipelinesRepositoryServerController;
 
 import java.util.Base64;
 import java.util.Collection;
-import java.util.LinkedList;
 
 @RestController
 public class PipelinesRepositoryServerController implements IPipelinesRepositoryServerController {
 
     @Autowired
-    private IPipelinesRepositoryMetadataService repositoryMetadataService;
-    @Autowired
-    private IPipelinesRepositoryService repositoryService;
-    @Autowired
-    private IService<User, String> userService;
+    private IUserService userService;
     @Autowired
     private IAccessTokenService tokenService;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private IRepositoryService repositoryService;
     @Autowired
-    private IPipelinesRepositoryUserMemberService repositoryUserMemberService;
+    private IRepositoryMetadataService repositoryMetadataService;
     @Autowired
-    private IPipelinesRepositoryGroupMemberService repositoryGroupMemberService;
-    @Autowired
-    private IGroupMemberService groupMemberService;
+    private IRepositoryPermissionService permissionService;
 
 
 
     @Override
-    public ResponseEntity<Collection<TypedPipelineDescriptor>> getAll(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validateAccess(repositoryId, PermissionService.Access.Operation.GET, authHeader))
+    public ResponseEntity<byte[]> getLogo(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryId, authHeader, Access.Operation.GET))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = repositoryService.getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryId);
+
+        return new ResponseEntity<>(repository.getLogo(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> setLogo(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader, @RequestBody(required = false) byte[] logo) throws Exception {
+        if(!validAccess(repositoryId, authHeader, Access.Operation.UPDATE))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        IPipelinesRepository repository = getRepository(repositoryId);
+
+        repository.setLogo(logo);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Collection<IPipelineDescriptor>> getAll(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryId, authHeader, Access.Operation.GET))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        IPipelinesRepository repository = getRepository(repositoryId);
 
         Collection<IPipelineDescriptor> pipelines = repository.getAll();
-        Collection<TypedPipelineDescriptor> typedPipelines = new LinkedList<>();
-        for(IPipelineDescriptor pipeline : pipelines)
-            typedPipelines.add(JacksonEntityService.transformToTypedPipelineDescriptor(pipeline));
-
-        return new ResponseEntity<>(typedPipelines, HttpStatus.OK);
+        return new ResponseEntity<>(pipelines, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<TypedPipelineDescriptor> get(@PathVariable int repositoryId, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validateAccess(repositoryId, PermissionService.Access.Operation.GET, authHeader))
+    public ResponseEntity<IPipelineDescriptor> get(@PathVariable int repositoryId, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryId, authHeader, Access.Operation.GET))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = repositoryService.getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryId);
+
         IPipelineDescriptor pipeline = repository.get(pipelineName);
-        TypedPipelineDescriptor typedPipeline = JacksonEntityService.transformToTypedPipelineDescriptor(pipeline);
-
-        return new ResponseEntity<>(typedPipeline, HttpStatus.OK);
+        return new ResponseEntity<>(pipeline, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> insert(@PathVariable int repositoryId, @RequestBody TypedPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validateAccess(repositoryId, PermissionService.Access.Operation.INSERT, authHeader))
+    public ResponseEntity<Void> insert(@PathVariable int repositoryId, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryId, authHeader, Access.Operation.INSERT))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = repositoryService.getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryId);
 
-        repository.insert(JacksonEntityService.transformToIPipelineDescriptor(pipeline));
+        repository.insert(pipeline);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<Void> update(@PathVariable int repositoryId, @RequestBody TypedPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validateAccess(repositoryId, PermissionService.Access.Operation.UPDATE, authHeader))
+    public ResponseEntity<Void> update(@PathVariable int repositoryId, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryId, authHeader, Access.Operation.UPDATE))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = repositoryService.getRepository(repositoryId);
-        repository.update(JacksonEntityService.transformToIPipelineDescriptor(pipeline));
+        IPipelinesRepository repository = getRepository(repositoryId);
+
+        repository.update(pipeline);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> delete(@PathVariable int repositoryId, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validateAccess(repositoryId, PermissionService.Access.Operation.DELETE, authHeader))
+        if(!validAccess(repositoryId, authHeader, Access.Operation.DELETE))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = repositoryService.getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryId);
+
         repository.delete(pipelineName);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
-    private boolean validateAccess(int repositoryId, PermissionService.Access.Operation operation, String authHeader) throws Exception {
-        PipelinesRepositoryMetadata repository = repositoryMetadataService.getById(repositoryId);
+    private boolean validAccess(int repositoryId, String authHeader, Access.Operation operations) throws Exception {
+        AccessToken token = getToken(authHeader);
+        User user = token == null ? getUser(authHeader) : token.getOwner();
 
-        AccessToken token = getCurrentToken(authHeader);
-        User user = token == null ? getCurrentUser(authHeader) : token.getOwner();
-
-        return validateAccess(operation, repository, user, token);
+        return permissionService.hasPermission(repositoryId, user, token, operations);
     }
 
-    private boolean validateAccess(PermissionService.Access.Operation operation, PipelinesRepositoryMetadata repository, User user, AccessToken token) throws Exception {
-        if(operation.equals(PermissionService.Access.Operation.GET))
-            return validateReadAccess(repository, user, token);
-        else
-            return validateWriteAccess(repository, user, token);
+    private IPipelinesRepository getRepository(int repositoryId) throws ServiceException {
+        RepositoryMetadata repositoryMetadata = repositoryMetadataService.getById(repositoryId);
+
+        if(repositoryMetadata == null)
+            throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryId);
+
+        IPipelinesRepository repository = repositoryService.getPipelinesRepository(repositoryMetadata);
+
+        if(repository == null)
+            throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryId);
+
+        return repository;
     }
 
-    private boolean validateReadAccess(PipelinesRepositoryMetadata repository, User user, AccessToken token) throws ServiceException {
-        if(repository.getIsPublic())
-            return true;
-
-        if(user == null)
-            throw new AuthenticationCredentialsNotFoundException("Not allowed!");
-
-        if(repository.getOwner().getUserName().equals(user.getUserName()))
-            return true;
-
-        for(PipelinesRepositoryUserMember member : repositoryUserMemberService.getMembersOfRepository(repository.getId()))
-            if(member.getUser().getUserName().equals(user.getUserName()))
-                return true;
-
-        for(PipelinesRepositoryGroupMember member : repositoryGroupMemberService.getMembersOfRepository(repository.getId()))
-            for(GroupMember m : groupMemberService.getMembersOfGroup(member.getGroup().getGroupName()))
-                if(m.getUser().getUserName().equals(user.getUserName()))
-                    return true;
-
-        return false;
-    }
-
-    private boolean validateWriteAccess(PipelinesRepositoryMetadata repository, User user, AccessToken token) throws ServiceException {
-        if(user == null)
-            throw new AuthenticationCredentialsNotFoundException("Not allowed!");
-
-        if(token != null && !token.getWriteAccess())
-            return false;
-
-        if(repository.getOwner().getUserName().equals(user.getUserName()))
-            return true;
-
-        for(PipelinesRepositoryUserMember member : repositoryUserMemberService.getMembersOfRepository(repository.getId()))
-            if(member.getUser().getUserName().equals(user.getUserName()) && member.getWriteAccess())
-                return true;
-
-        for(PipelinesRepositoryGroupMember member : repositoryGroupMemberService.getMembersOfRepository(repository.getId())) {
-            if(!member.getWriteAccess())
-                continue;
-
-            for(GroupMember m : groupMemberService.getMembersOfGroup(member.getGroup().getGroupName()))
-                if(m.getUser().getUserName().equals(user.getUserName()) && member.getWriteAccess())
-                    return true;
-        }
-
-        return false;
-    }
-
-    private User getCurrentUser(String authHeader) throws Exception {
+    private User getUser(String authHeader) throws Exception {
         if(authHeader == null || authHeader.isEmpty())
             return null;
 
@@ -196,24 +155,16 @@ public class PipelinesRepositoryServerController implements IPipelinesRepository
         String userName = authHeader.split(":")[0];
         String password = authHeader.split(":")[1];
 
-        User user = userService.getById(userName);
-
-        if(user == null)
-            return null;
-
-        if(!passwordEncoder.matches(password, user.getPassword()))
-            throw new BadCredentialsException("Invalid credentials!");
-
-        return user;
+        return userService.getById(userName);
     }
 
-    private AccessToken getCurrentToken(String authHeader) throws Exception {
+    private AccessToken getToken(String authHeader) throws Exception {
         if(authHeader == null || authHeader.isEmpty())
             return null;
 
         authHeader = authHeader.replace("Bearer", "");
 
-        AccessToken token = tokenService.getTokensByToken(authHeader);
+        AccessToken token = tokenService.getAccessTokenByToken(authHeader);
 
         return token;
     }
