@@ -2,7 +2,7 @@ package pt.isel.ngspipes.share_pipelines_server_repository.serviceInterface.conf
 
 public class Routes {
 
-    public static final String PIPELINES_REPOSITORY_SERVER_URI = "/server/{repositoryId}";
+    public static final String PIPELINES_REPOSITORY_SERVER_URI = "/server/{repositoryName}";
 
     public static final String GET_LOGO_URI = PIPELINES_REPOSITORY_SERVER_URI + "/logo";
     public static final String SET_LOGO_URI = PIPELINES_REPOSITORY_SERVER_URI + "/logo";

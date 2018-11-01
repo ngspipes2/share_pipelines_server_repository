@@ -12,24 +12,24 @@ import java.util.Collection;
 public interface IPipelinesRepositoryServerController {
 
     @RequestMapping(value = Routes.GET_LOGO_URI, method = RequestMethod.GET)
-    ResponseEntity<byte[]> getLogo(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
+    ResponseEntity<byte[]> getLogo(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
 
     @RequestMapping(value = Routes.SET_LOGO_URI, method = RequestMethod.POST)
-    ResponseEntity<Void> setLogo(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader, @RequestBody(required = false) byte[] logo) throws Exception;
+    ResponseEntity<Void> setLogo(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader, @RequestBody(required = false) byte[] logo) throws Exception;
 
     @RequestMapping(value = Routes.GET_ALL_PIPELINES_URI, method = RequestMethod.GET)
-    ResponseEntity<Collection<IPipelineDescriptor>> getAll(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
+    ResponseEntity<Collection<IPipelineDescriptor>> getAll(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
 
     @RequestMapping(value = Routes.GET_PIPELINE_URI, method = RequestMethod.GET)
-    ResponseEntity<IPipelineDescriptor> get(@PathVariable int repositoryId, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
+    ResponseEntity<IPipelineDescriptor> get(@PathVariable String repositoryName, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
 
     @RequestMapping(value = Routes.INSERT_PIPELINE_URI, method = RequestMethod.POST)
-    ResponseEntity<Void> insert(@PathVariable int repositoryId, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
+    ResponseEntity<Void> insert(@PathVariable String repositoryName, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
 
     @RequestMapping(value = Routes.UPDATE_PIPELINE_URI, method = RequestMethod.PUT)
-    ResponseEntity<Void> update(@PathVariable int repositoryId, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
+    ResponseEntity<Void> update(@PathVariable String repositoryName, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
 
     @RequestMapping(value = Routes.DELETE_PIPELINE_URI, method = RequestMethod.DELETE)
-    ResponseEntity<Void> delete(@PathVariable int repositoryId, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
+    ResponseEntity<Void> delete(@PathVariable String repositoryName, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
 
 }

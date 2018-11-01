@@ -42,54 +42,54 @@ public class PipelinesRepositoryServerController implements IPipelinesRepository
 
 
     @Override
-    public ResponseEntity<byte[]> getLogo(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validAccess(repositoryId, authHeader, Access.Operation.GET))
+    public ResponseEntity<byte[]> getLogo(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.GET))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryName);
 
         return new ResponseEntity<>(repository.getLogo(), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> setLogo(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader, @RequestBody(required = false) byte[] logo) throws Exception {
-        if(!validAccess(repositoryId, authHeader, Access.Operation.UPDATE))
+    public ResponseEntity<Void> setLogo(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader, @RequestBody(required = false) byte[] logo) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.UPDATE))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryName);
 
         repository.setLogo(logo);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Collection<IPipelineDescriptor>> getAll(@PathVariable int repositoryId, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validAccess(repositoryId, authHeader, Access.Operation.GET))
+    public ResponseEntity<Collection<IPipelineDescriptor>> getAll(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.GET))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryName);
 
         Collection<IPipelineDescriptor> pipelines = repository.getAll();
         return new ResponseEntity<>(pipelines, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<IPipelineDescriptor> get(@PathVariable int repositoryId, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validAccess(repositoryId, authHeader, Access.Operation.GET))
+    public ResponseEntity<IPipelineDescriptor> get(@PathVariable String repositoryName, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.GET))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryName);
 
         IPipelineDescriptor pipeline = repository.get(pipelineName);
         return new ResponseEntity<>(pipeline, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Void> insert(@PathVariable int repositoryId, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validAccess(repositoryId, authHeader, Access.Operation.INSERT))
+    public ResponseEntity<Void> insert(@PathVariable String repositoryName, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.INSERT))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryName);
 
         repository.insert(pipeline);
 
@@ -97,11 +97,11 @@ public class PipelinesRepositoryServerController implements IPipelinesRepository
     }
 
     @Override
-    public ResponseEntity<Void> update(@PathVariable int repositoryId, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validAccess(repositoryId, authHeader, Access.Operation.UPDATE))
+    public ResponseEntity<Void> update(@PathVariable String repositoryName, @RequestBody IPipelineDescriptor pipeline, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.UPDATE))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryName);
 
         repository.update(pipeline);
 
@@ -109,11 +109,11 @@ public class PipelinesRepositoryServerController implements IPipelinesRepository
     }
 
     @Override
-    public ResponseEntity<Void> delete(@PathVariable int repositoryId, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
-        if(!validAccess(repositoryId, authHeader, Access.Operation.DELETE))
+    public ResponseEntity<Void> delete(@PathVariable String repositoryName, @PathVariable String pipelineName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.DELETE))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
-        IPipelinesRepository repository = getRepository(repositoryId);
+        IPipelinesRepository repository = getRepository(repositoryName);
 
         repository.delete(pipelineName);
 
@@ -121,23 +121,23 @@ public class PipelinesRepositoryServerController implements IPipelinesRepository
     }
 
 
-    private boolean validAccess(int repositoryId, String authHeader, Access.Operation operations) throws Exception {
+    private boolean validAccess(String repositoryName, String authHeader, Access.Operation operations) throws Exception {
         AccessToken token = getToken(authHeader);
         User user = token == null ? getUser(authHeader) : token.getOwner();
 
-        return permissionService.hasPermission(repositoryId, user, token, operations);
+        return permissionService.hasPermission(repositoryName, user, token, operations);
     }
 
-    private IPipelinesRepository getRepository(int repositoryId) throws ServiceException {
-        RepositoryMetadata repositoryMetadata = repositoryMetadataService.getById(repositoryId);
+    private IPipelinesRepository getRepository(String repositoryName) throws ServiceException {
+        RepositoryMetadata repositoryMetadata = repositoryMetadataService.getById(repositoryName);
 
         if(repositoryMetadata == null)
-            throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryId);
+            throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryName);
 
         IPipelinesRepository repository = repositoryService.getPipelinesRepository(repositoryMetadata);
 
         if(repository == null)
-            throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryId);
+            throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryName);
 
         return repository;
     }
