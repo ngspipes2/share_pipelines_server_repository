@@ -129,12 +129,12 @@ public class PipelinesRepositoryServerController implements IPipelinesRepository
     }
 
     private IPipelinesRepository getRepository(String repositoryName) throws ServiceException {
-        RepositoryInfo repositoryMetadata = repositoryInfoService.getById(repositoryName);
+        RepositoryInfo repositoryInfo = repositoryInfoService.getById(repositoryName);
 
-        if(repositoryMetadata == null)
+        if(repositoryInfo == null)
             throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryName);
 
-        IPipelinesRepository repository = repositoryService.getPipelinesRepository(repositoryMetadata);
+        IPipelinesRepository repository = repositoryService.getPipelinesRepository(repositoryInfo);
 
         if(repository == null)
             throw new NonExistentEntityException("There is no PipelinesRepository with with:" + repositoryName);
