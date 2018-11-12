@@ -31,5 +31,4 @@ dependencies {
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.9.5'
 
     compile project(":share_core")
-    compile project(":share_dynamic_repository")
 }
