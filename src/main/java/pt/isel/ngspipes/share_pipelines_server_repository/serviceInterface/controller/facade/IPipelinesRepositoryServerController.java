@@ -17,6 +17,9 @@ public interface IPipelinesRepositoryServerController {
     @RequestMapping(value = Routes.SET_LOGO_URI, method = RequestMethod.POST)
     ResponseEntity<Void> setLogo(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader, @RequestBody(required = false) byte[] logo) throws Exception;
 
+    @RequestMapping(value = Routes.GET_PIPELINES_NAMES_URI, method = RequestMethod.GET)
+    ResponseEntity<Collection<String>> getPipelinesNames(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
+
     @RequestMapping(value = Routes.GET_ALL_PIPELINES_URI, method = RequestMethod.GET)
     ResponseEntity<Collection<IPipelineDescriptor>> getAll(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception;
 

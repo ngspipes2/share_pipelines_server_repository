@@ -6,6 +6,7 @@ public class Routes {
 
     public static final String GET_LOGO_URI = PIPELINES_REPOSITORY_SERVER_URI + "/logo";
     public static final String SET_LOGO_URI = PIPELINES_REPOSITORY_SERVER_URI + "/logo";
+    public static final String GET_PIPELINES_NAMES_URI = PIPELINES_REPOSITORY_SERVER_URI + "/names";
     public static final String GET_ALL_PIPELINES_URI = PIPELINES_REPOSITORY_SERVER_URI + "/pipelines";
     public static final String GET_PIPELINE_URI = PIPELINES_REPOSITORY_SERVER_URI + "/pipelines/{pipelineName}";
     public static final String INSERT_PIPELINE_URI = PIPELINES_REPOSITORY_SERVER_URI + "/pipelines";

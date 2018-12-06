@@ -63,6 +63,17 @@ public class PipelinesRepositoryServerController implements IPipelinesRepository
     }
 
     @Override
+    public ResponseEntity<Collection<String>> getPipelinesNames(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
+        if(!validAccess(repositoryName, authHeader, Access.Operation.GET))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        IPipelinesRepository repository = getRepository(repositoryName);
+
+        Collection<String> names = repository.getPipelinesNames();
+        return new ResponseEntity<>(names, HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Collection<IPipelineDescriptor>> getAll(@PathVariable String repositoryName, @RequestHeader(value = "Authorization", required = false) String authHeader) throws Exception {
         if(!validAccess(repositoryName, authHeader, Access.Operation.GET))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
