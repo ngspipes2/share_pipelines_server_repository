@@ -32,3 +32,13 @@ dependencies {
 
     compile project(":share_core")
 }
+
+jar {
+    manifest {
+        attributes "Main-Class": "pt.isel.ngspipes.share_pipelines_server_repository.App"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
