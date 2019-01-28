@@ -2,7 +2,6 @@ group 'pt.isel.ngspipes'
 version '1.0'
 
 apply plugin: 'java'
-apply plugin: 'war'
 
 sourceCompatibility = 1.8
 
