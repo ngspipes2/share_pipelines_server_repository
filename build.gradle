@@ -45,11 +45,3 @@ jar {
 
     baseName 'PipelinesServer'
 }
-
-war {
-    manifest {
-        attributes "Main-Class": "pt.isel.ngspipes.share_pipelines_server_repository.App"
-    }
-
-    baseName 'PipelinesServer'
-}
